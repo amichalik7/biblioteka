@@ -1,9 +1,6 @@
 package org.example.serwisy;
-
 import org.example.model.Uzytkownik;
-
 import java.util.Scanner;
-
 public class ApplicationSerwis {
     Welcome welcome = new Welcome();
     KsiazkaSerwis ks = new KsiazkaSerwis();

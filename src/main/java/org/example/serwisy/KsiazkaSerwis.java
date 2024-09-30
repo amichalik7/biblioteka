@@ -41,8 +41,25 @@ public class KsiazkaSerwis {
              PreparedStatement statement = connection.prepareStatement("select stan_magazynowy from ksiazki where id=?")) {
             statement.setInt(1, id);
             ResultSet resultSet = statement.executeQuery();
+            int ileWypozyczonych = ileWypozyczen(id);
             while (resultSet.next()) {
                 ile = resultSet.getInt("stan_magazynowy");
+            }
+            return ile-ileWypozyczonych;
+
+        } catch (Exception e) {
+            System.out.println("Błąd" + e.getMessage());
+        }
+        return ile;
+    }
+    public int ileWypozyczen(int id) {
+        int ile = 0;
+        try (Connection connection = dataSource.getConnection();
+             PreparedStatement statement = connection.prepareStatement("select count(*) from uzytkownik_ksiazka where id_ksiazki=?")) {
+            statement.setInt(1, id);
+            ResultSet resultSet = statement.executeQuery();
+            while (resultSet.next()) {
+                ile = resultSet.getInt(1);
             }
             return ile;
 
@@ -82,11 +99,14 @@ public class KsiazkaSerwis {
 
     public void wyswietlKsiazki() {
         try (Connection connection = dataSource.getConnection();
-             PreparedStatement statement = connection.prepareStatement("select * from ksiazki where stan_magazynowy>0")) {
+             PreparedStatement statement = connection.prepareStatement("select * from ksiazki")) {
+
             ResultSet resultSet = statement.executeQuery();
             while (resultSet.next()) {
-                System.out.print(resultSet.getInt(1) + " " + resultSet.getString(2) + " " + resultSet.getString(3) + " " + resultSet.getInt(4));
-                System.out.println();
+                if (ileKsiazek(resultSet.getInt("id"))>0) {
+                    System.out.print(resultSet.getInt(1) + " " + resultSet.getString(2) + " " + resultSet.getString(3) + " " + ileKsiazek(resultSet.getInt(1)));
+                    System.out.println();
+                }
             }
 
         } catch (Exception e) {
