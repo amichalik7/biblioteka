@@ -2,7 +2,6 @@ package org.example.serwisy;
 
 import com.mysql.cj.jdbc.MysqlDataSource;
 import org.example.model.Ksiazka;
-import org.example.model.Uzytkownik;
 
 import java.sql.Connection;
 import java.sql.PreparedStatement;
