@@ -45,13 +45,14 @@ public class KsiazkaSerwis {
             while (resultSet.next()) {
                 ile = resultSet.getInt("stan_magazynowy");
             }
-            return ile-ileWypozyczonych;
+            return ile - ileWypozyczonych;
 
         } catch (Exception e) {
             System.out.println("Błąd" + e.getMessage());
         }
         return ile;
     }
+
     public int ileWypozyczen(int id) {
         int ile = 0;
         try (Connection connection = dataSource.getConnection();
@@ -103,7 +104,7 @@ public class KsiazkaSerwis {
 
             ResultSet resultSet = statement.executeQuery();
             while (resultSet.next()) {
-                if (ileKsiazek(resultSet.getInt("id"))>0) {
+                if (ileKsiazek(resultSet.getInt("id")) > 0) {
                     System.out.print(resultSet.getInt(1) + " " + resultSet.getString(2) + " " + resultSet.getString(3) + " " + ileKsiazek(resultSet.getInt(1)));
                     System.out.println();
                 }
@@ -113,8 +114,87 @@ public class KsiazkaSerwis {
             System.out.println("Błąd" + e.getMessage());
         }
     }
+    public void wyswietlWszystkieKsiazki() {
+        try (Connection connection = dataSource.getConnection();
+             PreparedStatement statement = connection.prepareStatement("select * from ksiazki")) {
 
-    //usun ksiazke
+            ResultSet resultSet = statement.executeQuery();
+            while (resultSet.next()) {
+                    System.out.print(resultSet.getInt(1) + " " + resultSet.getString(2) + " " + resultSet.getString(3) + " " + resultSet.getInt(4));
+                    System.out.println();
+                }
+        } catch (Exception e) {
+            System.out.println("Błąd" + e.getMessage());
+        }
+    }
+    public int ileWszystkichKsiazek( int id) {
+        try (Connection connection = dataSource.getConnection();
+             PreparedStatement statement = connection.prepareStatement("select stan_magazynowy from ksiazki where id=?")) {
+            statement.setInt(1, id);
+            ResultSet resultSet = statement.executeQuery();
+            while (resultSet.next()) {
+                return resultSet.getInt(1);
+            }
+        } catch (Exception e) {
+            System.out.println("Błąd" + e.getMessage());
+        }
+        return 0;
+    }
+
+    public void wyswietlWypozyczoneKsiazki() {
+        try (Connection connection = dataSource.getConnection();
+             PreparedStatement statement = connection.prepareStatement("select uzytkownicy.imie, uzytkownicy.nazwisko, uzytkownik_ksiazka.id_ksiazki, ksiazki.tytul, ksiazki.autor from uzytkownik_ksiazka join ksiazki on uzytkownik_ksiazka.id_ksiazki=ksiazki.id join uzytkownicy on uzytkownik_ksiazka.id_uzytkownika=uzytkownicy.id ")) {
+
+            ResultSet resultSet = statement.executeQuery();
+            while (resultSet.next()) {
+                System.out.print(resultSet.getString("imie") + " " + resultSet.getString("nazwisko") + " " +resultSet.getInt("id_ksiazki") + " " + resultSet.getString("tytul") + " " + resultSet.getString("autor"));
+                System.out.println();
+            }
+        } catch (Exception e) {
+            System.out.println("Błąd" + e.getMessage());
+        }
+    }
+
+    public void usunKsiazke(int id) {
+        try (Connection connection = dataSource.getConnection();
+             PreparedStatement statement = connection.prepareStatement("delete from ksiazki where id=?")) {
+            statement.setInt(1, id);
+            statement.executeUpdate();
+            System.out.println("Książka została usunięta");
+        } catch (Exception e) {
+            System.out.println("Błąd");
+        }
+    }
+
+    public void dodajEgzemplarz(int id){
+        try (Connection connection = dataSource.getConnection();
+             PreparedStatement statement = connection.prepareStatement("update ksiazki set stan_magazynowy=? where id=?")) {
+
+            statement.setInt(1, ileWszystkichKsiazek(id)+1);
+            statement.setInt(2, id);
+            statement.executeUpdate();
+            System.out.println("Dodano do magazynu jeden egzemplarz książki");
+        } catch (Exception e) {
+            System.out.println("Błąd");
+        }
+    }
+    public void usunEgzemplarz(int id){
+        if (ileWszystkichKsiazek(id)>1){
+        try (Connection connection = dataSource.getConnection();
+             PreparedStatement statement = connection.prepareStatement("update ksiazki set stan_magazynowy=? where id=?")) {
+            statement.setInt(1, ileWszystkichKsiazek(id)-1);
+            statement.setInt(2, id);
+            statement.executeUpdate();
+            System.out.println("Z magazynu usunięto jeden egzemplarz książki");
+        } catch (Exception e) {
+            System.out.println("Błąd");
+        }
+        }
+        else {
+            System.out.println("To był ostatni egzemplarz tej ksiązki. Usuwam książkę z bazy");
+            usunKsiazke(id);
+        }
+    }
 
 }
 

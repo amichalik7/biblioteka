@@ -47,6 +47,24 @@ public class UzytkownikSerwis {
         return 0;
     }
 
+    public String podajRole(String email, String haslo){
+        try (Connection connection = dataSource.getConnection();
+             PreparedStatement statement = connection.prepareStatement("select * from uzytkownicy where email=? and haslo=?")) {
+            statement.setString(1, email);
+            statement.setString(2, haslo);
+            ResultSet resultSet = statement.executeQuery();
+            String rola = "";
+            while (resultSet.next()) {
+                rola = resultSet.getString("rola");
+            }
+            return rola;
+
+        } catch (Exception e) {
+            System.out.println("Błąd" + e.getMessage());
+        }
+        return "";
+    }
+
     public boolean dodajUzytkownika(Uzytkownik uzytkownik) {
         if (!login(uzytkownik.getEmail(), uzytkownik.getHaslo())) {
             try (Connection connection = dataSource.getConnection();

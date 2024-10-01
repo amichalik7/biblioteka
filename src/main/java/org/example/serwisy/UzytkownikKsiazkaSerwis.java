@@ -51,16 +51,15 @@ public class UzytkownikKsiazkaSerwis {
     public void sprawdzSwojeKsiazki(int idUzytkownika) {
         KsiazkaSerwis ks = new KsiazkaSerwis();
         try (Connection connection = dataSource.getConnection();
-             PreparedStatement statement = connection.prepareStatement("select * from uzytkownik_ksiazka where id_uzytkownika=?")) {
+             PreparedStatement statement = connection.prepareStatement("select uzytkownik_ksiazka.id_ksiazki, ksiazki.tytul, ksiazki.autor from uzytkownik_ksiazka inner join ksiazki on uzytkownik_ksiazka.id_ksiazki = ksiazki.id where id_uzytkownika = ?;")) {
             statement.setInt(1, idUzytkownika);
             ResultSet resultSet = statement.executeQuery();
             while (resultSet.next()){
-                System.out.println(resultSet.getInt("id_ksiazki"));
+                System.out.println(resultSet.getInt("id_ksiazki") +" " + resultSet.getString("tytul") + " " + resultSet.getString("autor"));
             }
         } catch (Exception e) {
             System.out.println("Błąd" + e.getMessage());
         }
     }
 
-   // zwrot
 }
